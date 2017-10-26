@@ -44,8 +44,9 @@ class Searcher(object):
             word_index_list = self.indexer.get(word)
             word_len = len(word)
             for index_item in word_index_list:
-                _id,title_num,text_num = index_item['_id'],index_item['title_num'],index_item['text_num']
-                grade = (title_num * 10 + min(text_num,10))* stop_grade * word_len
+                _id,title_num,text_num,check_valid = index_item['_id'],index_item['title_num'],\
+                    index_item['text_num'],int(index_item['check_valid'])
+                grade = (title_num * 10 + min(text_num,10))* stop_grade * word_len * check_valid
                 res_dict[_id] += grade
         res_list = []
         for key,value in res_dict.items():

@@ -1,5 +1,6 @@
 # This is just a description file
 
+
 #format of rawdata in mongodb
 {   "_id" : ObjectId("59e418c92f773270ae125f3d"), 
     "id" : 1, 
@@ -9,7 +10,8 @@
     "publish_time" : "2008-09-20",
     "insert_time" : "2017-08-19 23:14:11",
     "insert_author" : "chenning", 
-    "content" : { "text" : "", "img" : [ ] } 
+    "content" : { "text" : "", "img" : [ ] } ,
+    "check_valid":1 # 0 valid, 2 invalid.
 }
 
 

@@ -108,7 +108,7 @@ class MemoryIndexer(object):
 
 
     #  format is ['_id,title_num,text_num','',...]
-    def _index_one_doc_seg_rawdata(self,__id,_seg_seq_title,_seg_seq_text):
+    def _index_one_doc_seg_rawdata(self,__id,_seg_seq_title,_seg_seq_text,_check_valid):
         seg_set = set(list(_seg_seq_title.keys())+list(_seg_seq_text.keys()))
 
         for word in seg_set:
@@ -118,19 +118,22 @@ class MemoryIndexer(object):
                 {
                     "_id":str(__id),
                     "title_num":seq_title,
-                    "text_num":seq_text
+                    "text_num":seq_text,
+                    "check_valid":_check_valid
                 }
             )
         return True
 
     
-    def index_docs_from_mongo(self,collection_seg_rawdata):
+    def index_docs_from_mongo(self,collection_seg_rawdata,collection_rawdata):
+        self.indexes = defaultdict(list)
         db_mongo = get_mongo_conn2coaldb()
         docs_gen = db_mongo[collection_seg_rawdata].find()
         for index,doc in enumerate(docs_gen):
             __id,_seg_seq_title,_seg_seq_text = doc['_id'],json.loads(doc['title_seg_sequence']),\
             json.loads(doc['text_seg_sequence'])
-            self._index_one_doc_seg_rawdata(__id,_seg_seq_title,_seg_seq_text)
+            _check_valid = db_mongo[collection_rawdata].find_one({"_id":ObjectId(__id)})['check_valid']
+            self._index_one_doc_seg_rawdata(__id,_seg_seq_title,_seg_seq_text,_check_valid)
             # print(__id,_seg_seq_title,_seg_seq_text)
             if index % 100 == 0:
                 print('success index %d' % index)
@@ -167,7 +170,17 @@ class RawDataPrepare(object):
             res.append(self.mongo_conn[self.collection_rawdata_name].find_one({"_id":ObjectId(_id)}))
         return res
             
-
+    def backup_rawdata(self,path):
+        res = self.mongo_conn[self.collection_rawdata_name].find()
+        myres = []
+        for item in res:
+            item['_id'] = str(item['_id'])
+            myres.append(item)
+        myjson = json.dumps(myres)
+        with open(path,'w') as fout:
+            fout.write(myjson)
+            fout.flush()
+            fout.close
 
 
 
@@ -179,18 +192,22 @@ if __name__ == "__main__":
     mongo_dbname = conf.mongo_db_name
     mongo_accident_case = conf.mongo_collection_rawdata
     mongo_accident_case_seg  = conf.mongo_collection_seg_rawdata
+
     r = RawDataPrepare(conf.mongo_collection_rawdata)
-    print(r.getdocsbyids(['59e418ca2f773270ae12666c']))
-    seg = Segmenter(_path_vocab='../data/vocab/vocab_0.txt',_path_stopwords='../data/vocab/stopwords_0.txt')
+    r.backup_rawdata('../data/rawdata_mongo_bk.json')
+    # print(r.getdocsbyids(['59e418ca2f773270ae12666c']))
+
+    # seg = Segmenter(_path_vocab='../data/vocab/vocab_0.txt',_path_stopwords='../data/vocab/stopwords_0.txt')
     # seg.segment_rawdata(mongo_url,mongo_dbname,mongo_accident_case,mongo_accident_case_seg)
     # indexer = MemoryIndexer('../data/index.txt')
-    # indexer.index_docs_from_mongo(mongo_url,mongo_dbname,mongo_accident_case_seg)
+    # indexer.index_docs_from_mongo(mongo_accident_case_seg,mongo_accident_case)
     # indexer.dumps_indexes_json('../data/index.txt')
-    # indexer.loads_indexes_json('../data/index.txt')
-    # print(indexer.get('四川'))
-    print(seg.segment_for_query('中国是个大国家！'))
+    # indexer.loads_indexes_json()
+    # print(indexer.get('瓦斯爆炸'))
+    # print(seg.segment_for_query('中国是个大国家！'))
     # print(list(seg.set_stopwords)[:100])
-    print('大' in seg.set_stopwords)
+
+
 
 
     

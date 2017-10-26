@@ -11,7 +11,7 @@ data_prefix_path = os.path.join(os.path.dirname(__file__),'data')
 #mongodb info
 mongo_url = "mongodb://localhost:27017"
 mongo_db_name = "test"
-mongo_collection_rawdata = "coal_accident_case"
+mongo_collection_rawdata = "coal_accident_case_check"
 mongo_collection_seg_rawdata = "seg_coal_accident_case"
 #redis info
 
