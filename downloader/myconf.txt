@@ -1,0 +1,33 @@
+# This is just a description file
+
+#format of rawdata in mongodb
+{   "_id" : ObjectId("59e418c92f773270ae125f3d"), 
+    "id" : 1, 
+    "title" : "辽宁省沈阳市苏家屯区某煤矿瓦斯煤尘爆炸", 
+    "url" : "http://www.mkaq.org/html/2008/09/20/23208.shtml", 
+    "source" : "煤矿安全生产网", 
+    "publish_time" : "2008-09-20",
+    "insert_time" : "2017-08-19 23:14:11",
+    "insert_author" : "chenning", 
+    "content" : { "text" : "", "img" : [ ] } 
+}
+
+
+format for seg_rawdata in mongodb
+{
+    "_id":ObjectId("59e418c92f773270ae125f3d"),
+    "id":1,
+    "title_seg":["","",""],
+    "title_seg_sequence":json({"":10,"":1}),
+    "text_seg":["","",""],
+    "text_seg_sequence":json({"":10,"":1}
+}
+
+
+format for indexes
+{
+    word1:[{_id:ObjectId("59e418c92f773270ae125f3d"),title_num: 10,text_num: 11 "} 
+            ,...],
+    word2:[{_id:ObjectId("59e418c92f773270ae125f3d"),title_num: 10,text_num: 11 "} 
+            ,...],
+}

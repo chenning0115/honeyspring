@@ -1,0 +1,57 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv=”Content-Type” content=”text/html; charset=utf-8″ />
+        <title>Binoocle</title>
+        <style>
+            span{color:blue;}
+            strong{color:red;}
+            #recid{
+                width:300px;
+                height:25px;
+            }
+            #subid{
+                width:100px;
+                height:32px;
+            }
+            .box{width:800px;height:120px;}
+            .null_er{width:100px;height:120px;}
+            a:link { text-decoration: underline;}
+            .text_main {font-size:13px}
+            .green_linker {font-size:10px;color:green;}
+        </style>
+    </head>
+    <body>
+
+            <img src="./logo.png" width="140" height="35" title="Binoocle" style="float:left;">
+
+            <form method="post" action="">
+                <input type="text" name="title" id="recid" />
+                <input type="submit" value="Search！" id="subid"/>
+            </form>
+
+            <a href="http://115.159.97.236:8080/Scheme" style="float:right;"><button>tiny-scheme-online-interpreter</button></a>
+
+            <hr/>
+
+            {% for doc in objs %}
+                    <div class="null_er" style="float:left;">
+
+                    </div>
+                    <div class="box">
+                    <a href= {{ doc.get_url_ori() }} target="_blank">{{ doc.get_title() }} </a>
+                        <p class="text_main">
+                            {{ doc.get_text() }}
+                        </p>
+                        <p class="green_linker">
+                            {{ doc.get_url_ori() }}
+                        </p>
+                    </div>
+            {% end %}
+                <div style="text-align:center;border;">
+                <p class="text_main">
+                  More information on <a href="https://github.com/zhanglanqing/TinySearchEngine"  target="_blank"> Github </a>©2016 All Rights Reserved
+                </p>
+                </div>
+    </body>
+</html>
