@@ -23,6 +23,7 @@ data_vocab_stopwords_file = os.path.join(data_vocab_path,'stopwords_0.txt')
 
 
 # indexes of json file info
+data_index_all_data_sign = 'lkahsglasghfewioagnlahsgikahegawlknwelkabfajksgfkwebalefh'
 data_index_json_file = os.path.join(data_prefix_path,'index.txt')
 
 

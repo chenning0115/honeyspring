@@ -15,7 +15,10 @@ class ObjectConstructor(object):
 
     def get_text(self):
         string = self.doc['content']['text']
-        cur = string.find(self.query[0])
+        if len(self.query)>0:
+            cur = string.find(self.query[0])
+        else:
+            cur = 0
         i = max(0, cur - 40)
         j = cur + 90
         origin = string[i:j]

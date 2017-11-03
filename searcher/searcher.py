@@ -11,6 +11,7 @@ import datamanager
 from datamanager.dataprepare import RawDataPrepare
 from datamanager.dataprepare import Segmenter
 from datamanager.dataprepare import MemoryIndexer
+from conf import data_index_all_data_sign
 # from datamanager.myutils import get_mongo_conn2coaldb
 
 
@@ -20,24 +21,36 @@ class Searcher(object):
         self.segmenter = _segmenter
         self.data_prepare = _data_prepare
 
-    def query(self,query_phrase):
+    def query(self,query_phrase,start = 0, end = 20):
+        assert end >= start
         seg_words_tuple = self.segmenter.segment_for_query(query_phrase)
+        # print(seg_words_tuple)
         topk_tuple_list = self.retrive_topk(seg_words_tuple)
         #----------------------------------------
         # here we should rank the topk futher!
         #----------------------------------------
         # print(topk_tuple_list)
-        
         _id_list = [item[1] for item in topk_tuple_list]
-        res_docs = self.data_prepare.getdocsbyids(_id_list)
+        count = len(_id_list)
+        res_docs = self.data_prepare.getdocsbyids(_id_list[start:end])
         # for doc in res_docs:
         #     print(doc['title'],doc['url'])
-        return res_docs
+        return res_docs,count
             
+    def query_all(self,start=0,end=20):
+        assert end>=start
+        _id_dict_list = self.indexer.get(data_index_all_data_sign)
+        _id_list = []
+        for item in _id_dict_list:
+            if item['check_valid'] == 1:
+                _id_list.append(item['_id'])
+        count = len(_id_list)
+        res_docs = self.data_prepare.getdocsbyids(_id_list[start:end])
+        return res_docs,count
 
 
 
-    def retrive_topk(self,word_tuple_list,k=20):
+    def retrive_topk(self,word_tuple_list,k=None):
         res_dict = defaultdict(float) # {'word':grade}
         for word,stop in word_tuple_list:
             stop_grade = 0.1 if stop==0 else 1
@@ -54,7 +67,10 @@ class Searcher(object):
         def mykey(x):
             return x[0]
         res_list = sorted(res_list,key=mykey,reverse=True)
-        return res_list[:k]
+        if k is not None:
+            return res_list[:k]
+        else:
+            return res_list
 
         
         

@@ -3,6 +3,7 @@ import tornado.web
 
 import os
 import sys
+import math
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__),'../'))
 import webconf
@@ -30,17 +31,42 @@ class HomeHandler(tornado.web.RequestHandler):
 
 class SearchHandler(tornado.web.RequestHandler):
     def get(self):
-        query_phrase = self.get_arguments('query')
-        query_phrase = ' '.join(query_phrase)
-        res_docs = searcher.query(query_phrase)
+        query_phrases = self.get_arguments('query')
+        query_phrase = ''
+        if len(query_phrases)!=0:
+            query_phrase = ' '.join(query_phrases)
+        page_number_list = self.get_arguments('page')
+        page_number = 0
+        if len(page_number_list) != 0:
+            page_number = int(page_number_list[0])
+        start = page_number * webconf.searcher_num_per_page
+        end = start + webconf.searcher_num_per_page
+        # print(start,end)
+        if query_phrase == '':
+            res_docs,searchcount = searcher.query_all(start,end)
+        else:
+            res_docs,searchcount = searcher.query(query_phrase,start,end)
         res_objs = []
         for doc in res_docs:
             res_objs.append(ObjectConstructor(query_phrase,doc,'/rawdetail'))
-        return self.render(webconf.path_template_searchhandler,objs = res_objs)
+        page_pre = max(0,page_number - 1)
+        page_next = page_number + 1
+        response_objs = {
+            "objs":res_objs,
+            "query":query_phrase,
+            "pagepre":page_pre,
+            "pagenext":page_next,
+            "searchcount":searchcount,
+            "pagecount": math.ceil(searchcount / webconf.searcher_num_per_page),
+            "pagenumber":page_number 
+        }
+        return self.render(webconf.path_template_searchhandler,**response_objs)
 
 class SearchHandler_test(tornado.web.RequestHandler):
     def get(self):
         query_phrase = self.get_arguments('query')
+        page_number = self.get_arguments('page')
+        print(page_number)
         query_phrase = ' '.join(query_phrase)
         res_docs = searcher.query(query_phrase)
         res_objs = []

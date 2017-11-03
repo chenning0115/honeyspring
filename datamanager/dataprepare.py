@@ -13,9 +13,11 @@ import jieba
 import pprint
 from collections import defaultdict
 sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.join('..',os.path.dirname(__file__)))
 from myutils import get_mongo_conn2coaldb
 from bson.objectid import ObjectId
-
+from conf import data_index_all_data_sign
+from conf import data_index_json_file
 
 
 class Segmenter(object):
@@ -129,15 +131,22 @@ class MemoryIndexer(object):
         self.indexes = defaultdict(list)
         db_mongo = get_mongo_conn2coaldb()
         docs_gen = db_mongo[collection_seg_rawdata].find()
+        doc_ids = []
         for index,doc in enumerate(docs_gen):
             __id,_seg_seq_title,_seg_seq_text = doc['_id'],json.loads(doc['title_seg_sequence']),\
             json.loads(doc['text_seg_sequence'])
             _check_valid = db_mongo[collection_rawdata].find_one({"_id":ObjectId(__id)})['check_valid']
+            doc_ids.append(
+                {
+                    "_id":str(__id),
+                    "check_valid":_check_valid
+                }
+            )
             self._index_one_doc_seg_rawdata(__id,_seg_seq_title,_seg_seq_text,_check_valid)
             # print(__id,_seg_seq_title,_seg_seq_text)
             if index % 100 == 0:
                 print('success index %d' % index)
-        
+        self.indexes[data_index_all_data_sign] = doc_ids
     
     def dumps_indexes_json(self,path):
         data = json.dumps(self.indexes)
@@ -193,19 +202,22 @@ if __name__ == "__main__":
     mongo_accident_case = conf.mongo_collection_rawdata
     mongo_accident_case_seg  = conf.mongo_collection_seg_rawdata
 
-    r = RawDataPrepare(conf.mongo_collection_rawdata)
-    r.backup_rawdata('../data/rawdata_mongo_bk.json')
+    # r = RawDataPrepare(conf.mongo_collection_rawdata)
+    # r.backup_rawdata('../data/rawdata_mongo_bk.json')
     # print(r.getdocsbyids(['59e418ca2f773270ae12666c']))
 
-    # seg = Segmenter(_path_vocab='../data/vocab/vocab_0.txt',_path_stopwords='../data/vocab/stopwords_0.txt')
+    seg = Segmenter(_path_vocab='../data/vocab/vocab_0.txt',_path_stopwords='../data/vocab/stopwords_0.txt')
     # seg.segment_rawdata(mongo_url,mongo_dbname,mongo_accident_case,mongo_accident_case_seg)
-    # indexer = MemoryIndexer('../data/index.txt')
+    # indexer = MemoryIndexer(data_index_json_file)
+    # indexer = MemoryIndexer()
     # indexer.index_docs_from_mongo(mongo_accident_case_seg,mongo_accident_case)
-    # indexer.dumps_indexes_json('../data/index.txt')
+    # indexer.dumps_indexes_json(data_index_json_file)
     # indexer.loads_indexes_json()
-    # print(indexer.get('瓦斯爆炸'))
+    # print(indexer.get("瓦斯"))
     # print(seg.segment_for_query('中国是个大国家！'))
     # print(list(seg.set_stopwords)[:100])
+    print(seg.segment_for_search('瓦斯'))
+
 
 
 

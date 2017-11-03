@@ -12,5 +12,10 @@ path_template_formdetail = os.path.join(prefix_path_template,'formdetail.html')
 path_template_rawdetail = os.path.join(prefix_path_template,'rawdetail.html')
 
 
+
+
+searcher_num_per_page = 20
+
+
 if __name__ == "__main__":
     print(prefix_path_template)
