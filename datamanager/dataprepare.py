@@ -190,7 +190,17 @@ class RawDataPrepare(object):
             fout.write(myjson)
             fout.flush()
             fout.close
-
+    def restore_rawdata(self,path):
+        with open(path,'r') as fin:
+            data_json = fin.read()
+            data= json.loads(data_json)
+            colle = self.mongo_conn[self.collection_rawdata_name]
+            for index,doc in enumerate(data):
+                colle.insert(doc)
+                if index % 100 == 0:
+                    print('success inserted %d ' % index)
+        
+                
 
 
 
@@ -202,11 +212,12 @@ if __name__ == "__main__":
     mongo_accident_case = conf.mongo_collection_rawdata
     mongo_accident_case_seg  = conf.mongo_collection_seg_rawdata
 
-    # r = RawDataPrepare(conf.mongo_collection_rawdata)
+    r = RawDataPrepare('coal_accident_test')
+    r.restore_rawdata('../data/rawdata_mongo_bk.json')
     # r.backup_rawdata('../data/rawdata_mongo_bk.json')
     # print(r.getdocsbyids(['59e418ca2f773270ae12666c']))
 
-    seg = Segmenter(_path_vocab='../data/vocab/vocab_0.txt',_path_stopwords='../data/vocab/stopwords_0.txt')
+    # seg = Segmenter(_path_vocab='../data/vocab/vocab_0.txt',_path_stopwords='../data/vocab/stopwords_0.txt')
     # seg.segment_rawdata(mongo_url,mongo_dbname,mongo_accident_case,mongo_accident_case_seg)
     # indexer = MemoryIndexer(data_index_json_file)
     # indexer = MemoryIndexer()
@@ -216,7 +227,8 @@ if __name__ == "__main__":
     # print(indexer.get("瓦斯"))
     # print(seg.segment_for_query('中国是个大国家！'))
     # print(list(seg.set_stopwords)[:100])
-    print(seg.segment_for_search('瓦斯'))
+    # print(seg.segment_for_search('瓦斯'))
+    
 
 
 
