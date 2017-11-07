@@ -196,6 +196,7 @@ class RawDataPrepare(object):
             data= json.loads(data_json)
             colle = self.mongo_conn[self.collection_rawdata_name]
             for index,doc in enumerate(data):
+                doc['_id'] = ObjectId(doc['_id'])
                 colle.insert(doc)
                 if index % 100 == 0:
                     print('success inserted %d ' % index)
