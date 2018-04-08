@@ -18,6 +18,7 @@ from myutils import get_mongo_conn2coaldb
 from bson.objectid import ObjectId
 from conf import data_index_all_data_sign
 from conf import data_index_json_file
+import conf
 
 
 class Segmenter(object):
@@ -202,7 +203,41 @@ class RawDataPrepare(object):
                     print('success inserted %d ' % index)
         
                 
+class SimCaseSearch(object):
+    def __init__(self, method):
+        self.collection_distance_name = conf.mongo_collection_distance
+        self.mongo_conn = get_mongo_conn2coaldb()
+        self.method = method
+        self.save_path = conf.data_distance_path + "/" + method
+        self.load_data()
 
+
+    def load_data(self):
+        # docs = self.mongo_conn[self.collection_distance_name].find({"method":method})
+        # if len(docs) > 0:
+        #     doc = docs[0]
+        with open(self.save_path, 'r') as fin:
+            doc = json.loads(fin.read())
+        self.id2index = doc['index']
+        self.dis_data = doc['dis']
+        self.index2id = {}
+        for id,index in self.id2index.items():
+            self.index2id[index] = id
+    
+
+    def get_sim_case(self, id, num = 20):
+        if id not in self.id2index:
+            return []
+        index = self.id2index[id]
+        dis_  = self.dis_data[index]
+        dis_index = []
+        for i in range(len(dis_)):
+            dis_index.append([dis_[i], i])
+        dis_index = sorted(dis_index, key=lambda s: s[0])
+        res_ids = []
+        for i in range(num):
+            res_ids.append({'_id':self.index2id[dis_index[i][1]],'dis':dis_index[i][0]})
+        return res_ids
 
 
 if __name__ == "__main__":

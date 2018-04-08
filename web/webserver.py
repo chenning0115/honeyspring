@@ -13,6 +13,7 @@ from datamanager.dataprepare import RawDataPrepare
 from datamanager.dataprepare import Segmenter
 from searcher.searcher import Searcher
 from objectconstructer import ObjectConstructor
+from datamanager.dataprepare import SimCaseSearch
 
 # global object
 print('loading data..')
@@ -20,6 +21,7 @@ indexer = MemoryIndexer(_data_path = conf.data_index_json_file)
 segementer = Segmenter(_path_vocab = conf.data_vocab_vocab_file,_path_stopwords = conf.data_vocab_stopwords_file)
 dataprepare = RawDataPrepare(conf.mongo_collection_rawdata)
 searcher = Searcher(_indexer = indexer,_segmenter = segementer,_data_prepare = dataprepare)
+simcasesearch = SimCaseSearch(conf.distance_method)
 print('searcher construct complete..')
 
 
@@ -48,7 +50,7 @@ class SearchHandler(tornado.web.RequestHandler):
             res_docs,searchcount = searcher.query(query_phrase,start,end)
         res_objs = []
         for doc in res_docs:
-            res_objs.append(ObjectConstructor(query_phrase,doc,'/rawdetail'))
+            res_objs.append(ObjectConstructor(query_phrase,doc,'/rawdetail','/simcase'))
         page_pre = max(0,page_number - 1)
         page_next = page_number + 1
         response_objs = {
@@ -71,7 +73,7 @@ class SearchHandler_test(tornado.web.RequestHandler):
         res_docs = searcher.query(query_phrase)
         res_objs = []
         for doc in res_docs:
-            res_objs.append(ObjectConstructor(query_phrase,doc,'/rawdetail'))
+            res_objs.append(ObjectConstructor(query_phrase,doc,'/rawdetail','/simcase'))
         return self.render(webconf.path_template_queryhandler,objs = res_objs)
 
 class FormDetailHandler(tornado.web.RequestHandler):
@@ -90,6 +92,27 @@ class RawDetailHanlder(tornado.web.RequestHandler):
             mydoc['content']['text'] = '<p>' + mydoc['content']['text']+'</p>'
             return self.render(webconf.path_template_rawdetail,mydoc = mydoc)
     
+class SimCaseHandler(tornado.web.RequestHandler):
+    def get(self):
+        doc_id = self.get_arguments('_id')[0].strip()
+        if doc_id== '':
+            return 
+        ids_dis = simcasesearch.get_sim_case(doc_id)
+        ids = []
+        dis = []
+        for dd in ids_dis:
+            ids.append(dd['_id'])
+            dis.append(dd['dis'])
+        docs = dataprepare.getdocsbyids(ids)
+        res_objs = []
+        for i in range(len(docs)):
+            doc = docs[i]
+            doc['dis'] = dis[i]
+            res_objs.append(ObjectConstructor("",doc,'/rawdetail','/simcase'))
+
+        return self.render(webconf.path_template_simdocs, objs = res_objs)
+        
+        
 
 
 
@@ -105,7 +128,8 @@ application = tornado.web.Application([
         (r"/search_test",SearchHandler_test),
         (r"/search",SearchHandler),
         (r"/formdetail",FormDetailHandler),
-        (r"/rawdetail",RawDetailHanlder)
+        (r"/rawdetail",RawDetailHanlder),
+        (r"/simcase",SimCaseHandler)
     ],**settings)
 
 

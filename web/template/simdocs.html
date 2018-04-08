@@ -39,16 +39,14 @@
 
                     </div>
                     <div class="box">
-                    <a href= {{ doc.get_url_ori() }} target="_blank">{{ doc.get_title() }}  </a>
+                    <a href= {{ doc.get_url_ori() }} target="_blank">{{ doc.get_title() }} </a>
+                    <span class="label label-info"><strong>（距离度量:{{doc.get_simcase_distance()}}）</strong></span>
                         <p class="text_main">
                             {{ doc.get_text() }}
                         </p>
                         <p class="green_linker">
                             {{ doc.get_url_ori() }}
-                            <a href= {{ doc.get_simcase_ori() }} target="_blank"><span class="label label-info">相似案例</span></a>
-                            
                         </p>
-                        
                     </div>
             {% end %}
                 <div style="text-align:center;border;">

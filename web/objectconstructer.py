@@ -1,9 +1,10 @@
 class ObjectConstructor(object):
 
-    def __init__(self, _query, _doc, _prefix_url_rawdetail):
+    def __init__(self, _query, _doc, _prefix_url_rawdetail, _prefix_url_simcase):
         self.query = _query
         self.doc = _doc
         self.prefix_url_rawdetail = _prefix_url_rawdetail
+        self.prefix_url_simcase = _prefix_url_simcase
 
     def get_title(self):
         title = ''
@@ -36,3 +37,12 @@ class ObjectConstructor(object):
     def get_url_rawdetail(self):
         url = self.prefix_url_rawdetail + '?_id=' + str(self.doc['_id'])
         return url
+
+    def get_simcase_ori(self):
+        url = self.prefix_url_simcase + "?_id=" + str(self.doc['_id'])
+        return url
+
+    def get_simcase_distance(self):
+        return self.doc['dis']
+
+        
